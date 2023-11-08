@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rider Registration</title>
+  </head>
+  <body>
+    <h1>Rider Registration</h1>
+    <p>Select your pick-up point:</p>
+    <button id="autoPickupBtn">Use My Location</button>
+
+    <p>Or pick your pick-up location on the map:</p>
+    <div id="map" style="height: 300px; width: 80%"></div>
+
+    <p>Select your destination:</p>
+    <input type="text" id="destination" placeholder="Enter your destination" />
+
+    <p>Select your preferred vehicle type:</p>
+    <select id="vehicleType">
+      <option value="motorcycle">Motorcycle</option>
+      <option value="electric_motorcycle">Electric Motorcycle</option>
+      <option value="electric_vehicle">Electric Vehicle</option>
+      <option value="small_car">Small Car</option>
+      <option value="normal_car">Normal Car</option>
+      <option value="seater_car">7-Seater Car</option>
+    </select>
+
+    <button id="registerBtn">Register</button>
+
+    <script src="js/rider_reg.js"></script>
+  </body>
+</html>
