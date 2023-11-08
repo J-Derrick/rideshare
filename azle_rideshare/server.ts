@@ -1,7 +1,7 @@
 import * as WebSocket from 'ws';
-import http from 'http';
+import { createServer } from 'http';
 
-const server = http.createServer((req, res) => {
+const server = createServer((req, res) => {
   // Handle HTTP requests (if needed)
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('WebSocket server is running\n');

@@ -1,69 +1,37 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const WebSocket = __importStar(require("ws"));
-const wss = new WebSocket.Server({ port: 8080 });
-// Create separate arrays to store driver and rider WebSocket connections.
-const driverConnections = [];
-const riderConnections = [];
-wss.on('connection', (ws) => {
+var WebSocket = require("ws");
+var http_1 = require("http");
+var server = (0, http_1.createServer)(function (req, res) {
+    // Handle HTTP requests (if needed)
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('WebSocket server is running\n');
+});
+var wss = new WebSocket.Server({ server: server });
+// Create separate arrays to store WebSocket connections.
+var connections = [];
+wss.on('connection', function (ws) {
     console.log('Client connected');
-    ws.on('message', (message) => {
-        // Convert the incoming message to a string.
-        const messageStr = message.toString();
-        if (messageStr.startsWith('driver:')) {
-            driverConnections.push(ws);
-            const messageBody = messageStr.substring('driver:'.length);
-            riderConnections.forEach((rider) => {
-                if (rider !== ws && rider.readyState === WebSocket.OPEN) {
-                    rider.send(`Driver says: ${messageBody}`);
-                }
-            });
-        }
-        else if (messageStr.startsWith('rider:')) {
-            riderConnections.push(ws);
-            const messageBody = messageStr.substring('rider:'.length);
-            driverConnections.forEach((driver) => {
-                if (driver !== ws && driver.readyState === WebSocket.OPEN) {
-                    driver.send(`Rider says: ${messageBody}`);
-                }
-            });
-        }
-    });
-    ws.on('close', () => {
-        console.log('Client disconnected');
-        // Remove the WebSocket connection from the appropriate array.
-        const driverIndex = driverConnections.indexOf(ws);
-        if (driverIndex !== -1) {
-            driverConnections.splice(driverIndex, 1);
-        }
-        else {
-            const riderIndex = riderConnections.indexOf(ws);
-            if (riderIndex !== -1) {
-                riderConnections.splice(riderIndex, 1);
+    // Add the WebSocket connection to the connections array.
+    connections.push(ws);
+    ws.on('message', function (message) {
+        console.log("Received: ".concat(message));
+        // Broadcast the message to all connected clients.
+        connections.forEach(function (client) {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+                client.send(message);
             }
+        });
+    });
+    ws.on('close', function () {
+        console.log('Client disconnected');
+        // Remove the WebSocket connection from the connections array.
+        var index = connections.indexOf(ws);
+        if (index !== -1) {
+            connections.splice(index, 1);
         }
     });
+});
+server.listen(8080, function () {
+    console.log('WebSocket server is listening on port 8080');
 });
